@@ -116,7 +116,7 @@
     "@types/react": "17.0.2",
     "@types/request": "2.48.5",
     "@types/semver": "6.2.1",
-    "@types/socket.io-client": "1.4.32",
+    "@types/socket.io-client": "1.4.36",
     "@types/tapable": "0.2.5",
     "@types/uuid": "3.4.9",
     "@typescript-eslint/eslint-plugin": "3.10.1",
