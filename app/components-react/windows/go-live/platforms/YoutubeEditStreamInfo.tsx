@@ -1,16 +1,16 @@
 import CommonPlatformFields from '../CommonPlatformFields';
-import { CheckboxInput, ImageInput, ListInput } from '../../../shared/inputs';
+import { CheckboxInput, ImageInput, ListInput, TagsInput } from '../../../shared/inputs';
 import React, { useEffect } from 'react';
 import { Services } from '../../../service-provider';
 import { $t } from '../../../../services/i18n';
-import { createBinding } from '../../../shared/inputs/inputs';
 import BroadcastInput from './BroadcastInput';
-import { useAsyncState, useOnCreate } from '../../../hooks';
+import { useAsyncState } from '../../../hooks';
 import InputWrapper from '../../../shared/inputs/InputWrapper';
 import Form from '../../../shared/inputs/Form';
 import { useGoLiveSettings } from '../useGoLiveSettings';
 import electron from 'electron';
 import { IYoutubeStartStreamOptions } from '../../../../services/platforms/youtube';
+import { Tag } from 'antd';
 
 /***
  * Stream Settings for YT
@@ -25,13 +25,14 @@ export function YoutubeEditStreamInfo() {
     renderPlatformSettings,
     isMidStreamMode,
     getSettings,
+    useBinding,
   } = useGoLiveSettings(view => ({
     ytSettings: view.platforms.youtube,
   }));
   const is360video = ytSettings.projection === '360';
   const shouldShowSafeForKidsWarn = ytSettings.selfDeclaredMadeForKids;
   const broadcastId = ytSettings.broadcastId;
-  const bind = createBinding(
+  const bind = useBinding(
     () => getSettings().platforms.youtube,
     newYtSettings => updatePlatform('youtube', newYtSettings),
     fieldName => ({ disabled: fieldIsDisabled(fieldName as keyof IYoutubeStartStreamOptions) }),
@@ -146,6 +147,22 @@ export function YoutubeEditStreamInfo() {
             },
           ]}
           {...bind.latencyPreference}
+        />
+
+        <TagsInput
+          label="Tags"
+          mode="tags"
+          options={[]}
+          tokenSeparators={[',']}
+          tooltip={$t(
+            'Tags can be useful if content in your video is commonly misspelled. Otherwise, tags play a minimal role in helping viewers find your video',
+          )}
+          {...bind.tags}
+          tagRender={(tagProps, tag) => (
+            <Tag {...tagProps} color="#D22222">
+              {tag.label}
+            </Tag>
+          )}
         />
 
         <InputWrapper label={$t('Additional Settings')}>

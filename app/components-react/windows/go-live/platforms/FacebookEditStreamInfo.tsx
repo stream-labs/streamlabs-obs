@@ -44,6 +44,8 @@ export default function FacebookEditStreamInfo() {
     shouldShowGamingWarning,
     renderPlatformSettings,
     shouldShowPermissionWarn,
+    useBinding,
+    getSettings,
   } = useGoLiveSettings(view => {
     const fbState = FacebookService.state;
     const hasPages = !!fbState.facebookPages.length;
@@ -71,8 +73,9 @@ export default function FacebookEditStreamInfo() {
   const shouldShowPrivacyWarn =
     (!fbSettings.liveVideoId && fbSettings.privacy?.value !== 'SELF') ||
     (fbSettings.liveVideoId && fbSettings.privacy?.value);
-  const bind = createBinding(fbSettings, newFbSettings =>
-    updatePlatform('facebook', newFbSettings),
+  const bind = useBinding(
+    () => getSettings().platforms.facebook,
+    newFbSettings => updatePlatform('facebook', newFbSettings),
   );
 
   // define the local state

@@ -25,7 +25,6 @@ export default function TwitterInput() {
   });
 
   useEffect(() => {
-    console.log('update tweet text');
     const tweetText = getTweetText(streamTitle);
     updateSettings({ tweetText });
   }, [streamTitle]);

@@ -115,11 +115,11 @@ export function useFormState<T extends object>(initializer: T | (() => T)): TUse
   }
 
   return {
-    s,
+    s: stateRef.current,
     setState,
     updateState,
     setItem,
-    bind: createBinding(s, setState),
+    bind: createBinding(() => stateRef.current, setState),
     stateRef,
     form,
   };
