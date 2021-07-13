@@ -9,3 +9,4 @@ export { TagsInput } from './TagsInput';
 export { SliderInput } from './SliderInput';
 export { ImageInput } from './ImageInput';
 export { FileInput } from './FileInput';
+export { TimeInput } from './TimeInput';

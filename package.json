@@ -165,7 +165,7 @@
     "lodash-decorators": "4.5.0",
     "mark.js": "8.11.1",
     "mime": "2.4.3",
-    "moment": "2.22.2",
+    "moment": "^2.25.3",
     "overlayscrollbars": "1.13.0",
     "overlayscrollbars-vue": "0.2.2",
     "pixelmatch": "4.0.2",

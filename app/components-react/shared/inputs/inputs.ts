@@ -10,6 +10,8 @@ import { CheckboxChangeEvent } from 'antd/lib/checkbox';
 import { $t } from '../../../services/i18n';
 import pick from 'lodash/pick';
 import isEqual from 'lodash/isEqual';
+import { pascalize } from 'humps';
+import * as InputComponents from './index';
 
 type TInputType =
   | 'text'
@@ -20,7 +22,8 @@ type TInputType =
   | 'tags'
   | 'switch'
   | 'slider'
-  | 'image';
+  | 'image'
+  | 'time';
 
 export type TInputLayout = 'horizontal' | 'vertical' | 'inline';
 
@@ -143,7 +146,16 @@ export function useInput<
 
     // if the input is inside the form
     // then we need to setup it's value via Form API
-    if (form && value !== emptyVal) form.setFieldsValue({ [inputId]: value });
+    if (form && value !== emptyVal) {
+      // get the component class
+      const Component = getInputComponentByType(type);
+      // antd components may have another format than SLOBS wrapper components
+      // for example TimerInput requires dates to be in the Moment format
+      // meanwhile SLOBS services works with timestamps only
+      // call `Component.getAntdValue()` to make a conversion for this case
+      const newVal = Component.getAntdValue ? Component.getAntdValue(value) : value;
+      form.setFieldsValue({ [inputId]: newVal });
+    }
   }, [value]);
 
   const forceUpdate = useForceUpdate();
@@ -418,4 +430,11 @@ export function InputComponent<T extends Function>(f: T): T {
     }
     return true;
   }) as any) as T;
+}
+
+export function getInputComponentByType(
+  type: TInputType,
+): JSX.Element & { getAntdValue?: (value: unknown) => unknown } {
+  const componentName = pascalize(`${type}Input`);
+  return InputComponents[componentName];
 }
