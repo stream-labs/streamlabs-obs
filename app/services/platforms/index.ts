@@ -146,6 +146,7 @@ export interface IPlatformState {
 
 // All platform services should implement this interface.
 export interface IPlatformService {
+  capabilities: Set<TPlatformCapability>;
   hasCapability<T extends TPlatformCapability>(capability: T): this is TPlatformCapabilityMap[T];
 
   authWindowOptions: Electron.BrowserWindowConstructorOptions;
@@ -174,7 +175,7 @@ export interface IPlatformService {
 
   prepopulateInfo: () => Promise<unknown>;
 
-  scheduleStream?: (startTime: string, info: TStartStreamOptions) => Promise<any>;
+  scheduleStream?: (startTime: number, info: TStartStreamOptions) => Promise<any>;
 
   fetchNewToken: () => Promise<void>;
 

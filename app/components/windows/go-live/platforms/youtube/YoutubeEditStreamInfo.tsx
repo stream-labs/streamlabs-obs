@@ -13,7 +13,7 @@ import {
   YoutubeService,
 } from 'services/platforms/youtube';
 import CommonPlatformFields from '../../CommonPlatformFields';
-import { StreamingService, IStreamSettings } from 'services/streaming';
+import { StreamingService, IStreamSettings, IPlatformFlags } from 'services/streaming';
 import { SyncWithValue } from 'services/app/app-decorators';
 import BaseEditStreamInfo from '../BaseEditSteamInfo';
 import FormInput from 'components/shared/inputs/FormInput.vue';
@@ -40,7 +40,7 @@ export default class YoutubeEditStreamInfo extends BaseEditStreamInfo<Props> {
   private broadcastsLoaded = false;
 
   async created() {
-    this.broadcasts = await this.youtubeService.fetchBroadcasts();
+    this.broadcasts = await this.youtubeService.fetchEligibleBroadcasts();
     this.broadcastsLoaded = true;
   }
 
@@ -71,24 +71,20 @@ export default class YoutubeEditStreamInfo extends BaseEditStreamInfo<Props> {
   }
 
   private async onSelectBroadcastHandler() {
-    // set title and description fields from the selected broadcast
+    // set fields from the selected broadcast
     const ytSettings = this.settings.platforms.youtube;
     const selectedBroadcast = this.selectedBroadcast;
     if (!selectedBroadcast) return;
-    const { title, description } = selectedBroadcast.snippet;
-    const { privacyStatus, selfDeclaredMadeForKids } = selectedBroadcast.status;
-    const { enableDvr, projection, latencyPreference } = selectedBroadcast.contentDetails;
-    ytSettings.title = title;
-    ytSettings.description = description;
-    ytSettings.enableDvr = enableDvr;
-    ytSettings.latencyPreference = latencyPreference;
-    ytSettings.projection = projection;
-    ytSettings.privacyStatus = privacyStatus;
-    ytSettings.selfDeclaredMadeForKids = selfDeclaredMadeForKids;
-    ytSettings.thumbnail = '';
+    const newBroadcastOptions = await this.youtubeService.actions.return.fetchStartStreamOptionsForBroadcast(
+      selectedBroadcast.id,
+    );
+    this.updateBroadcastSettings({ ...ytSettings, ...newBroadcastOptions });
+  }
 
+  private async updateBroadcastSettings(settings: IYoutubeStartStreamOptions & IPlatformFlags) {
+    this.settings.platforms.youtube = settings;
     // category id is a property of YoutubeVideo
-    const video = await this.youtubeService.fetchVideo(selectedBroadcast.id);
+    const video = await this.youtubeService.fetchVideo(settings.broadcastId);
     this.setCategory(video.snippet.categoryId);
   }
 
@@ -198,7 +194,6 @@ export default class YoutubeEditStreamInfo extends BaseEditStreamInfo<Props> {
   render() {
     const ytSettings = this.settings.platforms.youtube;
     const shouldShowOptionalFields = !this.canShowOnlyRequiredFields;
-    const isUpdate = this.view.isMidStreamMode;
     const is360video = ytSettings.projection === '360';
     const shouldShowSafeForKidsWarn = ytSettings.selfDeclaredMadeForKids;
     return (

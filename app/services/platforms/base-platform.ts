@@ -34,7 +34,7 @@ export abstract class BasePlatformService<T extends IPlatformState> extends Stat
   @Inject() protected streamSettingsService: StreamSettingsService;
   abstract readonly platform: TPlatform;
 
-  protected abstract capabilities: Set<TPlatformCapability>;
+  abstract capabilities: Set<TPlatformCapability>;
 
   @ExecuteInCurrentWindow()
   hasCapability<T extends TPlatformCapability>(capability: T): this is TPlatformCapabilityMap[T] {

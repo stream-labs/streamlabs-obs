@@ -91,7 +91,7 @@ export default class GoLiveSettings extends TsxComponent<GoLiveProps> {
           <div style={{ width: '400px', marginRight: '42px' }}>
             {/*DESTINATION SWITCHERS*/}
             <DestinationSwitchers
-              platforms={this.settings.platforms}
+              platforms={this.settings.platforms as any}
               customDestinations={this.settings.customDestinations}
               title="Stream to %{platformName}"
               canDisablePrimary={false}

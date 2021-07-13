@@ -83,6 +83,7 @@ export default class FacebookEditStreamInfo extends BaseEditSteamInfo<Props> {
     this.scheduledVideos = await this.facebookService.fetchScheduledVideos(
       destinationType,
       destinationId,
+      true,
     );
     this.scheduledVideosLoaded = true;
   }
@@ -137,6 +138,7 @@ export default class FacebookEditStreamInfo extends BaseEditSteamInfo<Props> {
       destinationType: metadata.list({
         title: $t('Facebook Destination'),
         fullWidth: true,
+        disabled: this.props.isUpdateMode,
         options: [
           {
             value: 'me',
@@ -177,6 +179,7 @@ export default class FacebookEditStreamInfo extends BaseEditSteamInfo<Props> {
       page: metadata.list({
         title: $t('Facebook Page'),
         fullWidth: true,
+        disabled: this.props.isUpdateMode,
         options:
           this.facebookService.state.facebookPages.map(page => ({
             value: page.id,
@@ -189,6 +192,7 @@ export default class FacebookEditStreamInfo extends BaseEditSteamInfo<Props> {
       group: metadata.list({
         title: $t('Facebook Group'),
         fullWidth: true,
+        disabled: this.props.isUpdateMode,
         options:
           this.facebookService.state.facebookGroups.map(group => ({
             value: group.id,

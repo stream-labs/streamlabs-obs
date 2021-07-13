@@ -17,6 +17,7 @@ import { throwStreamError } from 'services/streaming/stream-error';
 import { BasePlatformService } from './base-platform';
 import { assertIsDefined, getDefined } from 'util/properties-type-guards';
 import electron from 'electron';
+import { Subject } from 'rxjs';
 import Utils from '../utils';
 import { YoutubeUploader } from './youtube/uploader';
 import { lazyModule } from 'util/lazy-module';
@@ -36,6 +37,7 @@ export interface IYoutubeStartStreamOptions extends IExtraBroadcastSettings {
   broadcastId?: string;
   description: string;
   privacyStatus?: 'private' | 'public' | 'unlisted';
+  scheduledStartTime?: number;
 }
 
 /**
@@ -65,6 +67,7 @@ export interface IYoutubeLiveBroadcast {
     title: string;
     description: string;
     scheduledStartTime: string;
+    actualStartTime: string;
     isDefaultBroadcast: boolean;
     liveChatId: string;
     thumbnails: {
@@ -131,6 +134,7 @@ export interface IYoutubeVideo {
     description: string;
     categoryId: string;
     tags: string[];
+    scheduledStartTime: string;
   };
 }
 
@@ -377,11 +381,11 @@ export class YoutubeService
   private async updateCategory(broadcastId: string, categoryId: string) {
     const video = await this.fetchVideo(broadcastId);
     const endpoint = 'videos?part=snippet';
-    const { title, description, tags } = video.snippet;
+    const { title, description, tags, scheduledStartTime } = video.snippet;
     await this.requestYoutube({
       body: JSON.stringify({
         id: broadcastId,
-        snippet: { categoryId, title, description, tags },
+        snippet: { categoryId, title, description, tags, scheduledStartTime },
       }),
       method: 'PUT',
       url: `${this.apiBase}/${endpoint}&access_token=${this.oauthToken}`,
@@ -412,13 +416,24 @@ export class YoutubeService
   }
 
   /**
-   * Create a YT broadcast (event) for the future stream
+   * Create or update a YT broadcast (event) for the future stream
    */
   async scheduleStream(
-    scheduledStartTime: string,
+    scheduledStartTime: number,
     options: IYoutubeStartStreamOptions,
-  ): Promise<void> {
-    await this.createBroadcast({ ...options, scheduledStartTime });
+  ): Promise<IYoutubeLiveBroadcast> {
+    let broadcast: IYoutubeLiveBroadcast;
+    if (!options.broadcastId) {
+      // create an new event
+      broadcast = await this.createBroadcast({ ...options, scheduledStartTime });
+    } else {
+      // update an existing event
+      broadcast = await this.updateBroadcast(options.broadcastId, {
+        ...options,
+        scheduledStartTime,
+      });
+    }
+    return broadcast;
   }
 
   async fetchNewToken(): Promise<void> {
@@ -452,14 +467,17 @@ export class YoutubeService
    * create a new broadcast via API
    */
   private async createBroadcast(
-    params: IYoutubeStartStreamOptions & { scheduledStartTime?: string },
+    params: IYoutubeStartStreamOptions & { scheduledStartTime?: number },
   ): Promise<IYoutubeLiveBroadcast> {
     const fields = ['snippet', 'contentDetails', 'status'];
     const endpoint = `liveBroadcasts?part=${fields.join(',')}`;
+    const scheduledStartTime = params.scheduledStartTime
+      ? new Date(params.scheduledStartTime)
+      : new Date();
     const data: Dictionary<any> = {
       snippet: {
         title: params.title,
-        scheduledStartTime: params.scheduledStartTime || new Date().toISOString(),
+        scheduledStartTime: scheduledStartTime.toISOString(),
         description: params.description,
       },
       contentDetails: {
@@ -492,17 +510,20 @@ export class YoutubeService
   /**
    * update the broadcast via API
    */
-  private async updateBroadcast(
+  async updateBroadcast(
     id: string,
     params: Partial<IYoutubeStartStreamOptions>,
     isMidStreamMode = false,
-  ): Promise<void> {
-    const broadcast = await this.fetchBroadcast(id);
+  ): Promise<IYoutubeLiveBroadcast> {
+    let broadcast = await this.fetchBroadcast(id);
 
+    const scheduledStartTime = params.scheduledStartTime
+      ? new Date(params.scheduledStartTime)
+      : new Date();
     const snippet: Partial<IYoutubeLiveBroadcast['snippet']> = {
       title: params.title,
       description: params.description,
-      scheduledStartTime: new Date().toISOString(),
+      scheduledStartTime: scheduledStartTime.toISOString(),
     };
 
     const contentDetails: Dictionary<any> = {
@@ -537,14 +558,25 @@ export class YoutubeService
     const endpoint = `liveBroadcasts?part=${fields.join(',')}&id=${id}`;
     const body: Dictionary<any> = { id, snippet, contentDetails, status };
 
-    await this.requestYoutube<IYoutubeLiveBroadcast>({
+    broadcast = await this.requestYoutube<IYoutubeLiveBroadcast>({
       body: JSON.stringify(body),
       method: 'PUT',
       url: `${this.apiBase}/${endpoint}&access_token=${this.oauthToken}`,
     });
 
+    await this.updateCategory(broadcast.id, params.categoryId!);
+
     // upload thumbnail
     if (params.thumbnail) await this.uploadThumbnail(params.thumbnail, broadcast.id);
+    return broadcast;
+  }
+
+  async removeBroadcast(id: string) {
+    const endpoint = `liveBroadcasts?&id=${id}`;
+    await this.requestYoutube<IYoutubeLiveBroadcast>({
+      method: 'DELETE',
+      url: `${this.apiBase}/${endpoint}&access_token=${this.oauthToken}`,
+    });
   }
 
   /**
@@ -591,7 +623,7 @@ export class YoutubeService
   /**
    * Fetch the list of upcoming and active broadcasts
    */
-  async fetchBroadcasts(): Promise<IYoutubeLiveBroadcast[]> {
+  async fetchEligibleBroadcasts(apply24hFilter = true): Promise<IYoutubeLiveBroadcast[]> {
     const fields = ['snippet', 'contentDetails', 'status'];
     const query = `part=${fields.join(',')}&maxResults=50&access_token=${this.oauthToken}`;
 
@@ -619,15 +651,34 @@ export class YoutubeService
 
     // cap the upcoming broadcasts list depending on the current date
     // unfortunately YT API doesn't provide a way to filter broadcasts by date
-    upcomingBroadcasts = upcomingBroadcasts.filter(broadcast => {
-      const timeRange = 1000 * 60 * 60 * 24;
-      const maxDate = Date.now() + timeRange;
-      const minDate = Date.now() - timeRange;
-      const broadcastDate = new Date(broadcast.snippet.scheduledStartTime).valueOf();
-      return broadcastDate > minDate && broadcastDate < maxDate;
-    });
+    if (apply24hFilter) {
+      upcomingBroadcasts = upcomingBroadcasts.filter(broadcast => {
+        const timeRange = 1000 * 60 * 60 * 24;
+        const maxDate = Date.now() + timeRange;
+        const minDate = Date.now() - timeRange;
+        const broadcastDate = new Date(broadcast.snippet.scheduledStartTime).valueOf();
+        return broadcastDate > minDate && broadcastDate < maxDate;
+      });
+    }
 
     return [...activeBroadcasts, ...upcomingBroadcasts];
+  }
+
+  /**
+   * Fetch the list of all broadcasts
+   */
+  async fetchBroadcasts(): Promise<IYoutubeLiveBroadcast[]> {
+    const fields = ['snippet', 'contentDetails', 'status'];
+    const query = `part=${fields.join(
+      ',',
+    )}&broadcastType=all&mine=true&maxResults=100&access_token=${this.oauthToken}`;
+    const broadcasts = (
+      await platformAuthorizedRequest<IYoutubeCollection<IYoutubeLiveBroadcast>>(
+        'youtube',
+        `${this.apiBase}/liveBroadcasts?${query}`,
+      )
+    ).items;
+    return broadcasts;
   }
 
   private async fetchLiveStream(id: string): Promise<IYoutubeLiveStream> {
@@ -636,7 +687,7 @@ export class YoutubeService
       .items[0];
   }
 
-  private async fetchBroadcast(
+  async fetchBroadcast(
     id: string,
     fields = ['snippet', 'contentDetails', 'status'],
   ): Promise<IYoutubeLiveBroadcast> {
@@ -648,6 +699,14 @@ export class YoutubeService
         `${this.apiBase}/liveBroadcasts?${query}`,
       )
     ).items[0];
+  }
+
+  get chatUrl() {
+    const broadcastId = this.state.settings.broadcastId;
+    if (!broadcastId) return '';
+    const mode = this.customizationService.isDarkTheme ? 'night' : 'day';
+    const youtubeDomain = mode === 'day' ? 'https://youtube.com' : 'https://gaming.youtube.com';
+    return `${youtubeDomain}/live_chat?v=${broadcastId}&is_popout=1`;
   }
 
   /**
@@ -675,14 +734,6 @@ export class YoutubeService
       categoryId: video.snippet.categoryId,
       thumbnail: broadcast.snippet.thumbnails.default.url,
     };
-  }
-
-  get chatUrl() {
-    const broadcastId = this.state.settings.broadcastId;
-    if (!broadcastId) return '';
-    const mode = this.customizationService.isDarkTheme ? 'night' : 'day';
-    const youtubeDomain = mode === 'day' ? 'https://youtube.com' : 'https://gaming.youtube.com';
-    return `${youtubeDomain}/live_chat?v=${broadcastId}&is_popout=1`;
   }
 
   openYoutubeEnable() {

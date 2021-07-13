@@ -17,6 +17,7 @@ import { WindowsService } from 'services/windows';
 import { $t } from 'services/i18n';
 import { SettingsService } from 'services/settings';
 import { UsageStatisticsService } from 'services/usage-statistics';
+import { NavigationService } from '../services/navigation';
 
 @Component({
   components: {
@@ -35,6 +36,7 @@ export default class StudioFooterComponent extends Vue {
   @Inject() performanceService: PerformanceService;
   @Inject() youtubeService: YoutubeService;
   @Inject() usageStatisticsService: UsageStatisticsService;
+  @Inject() navigationService: NavigationService;
 
   @Prop() locked: boolean;
 
@@ -96,7 +98,8 @@ export default class StudioFooterComponent extends Vue {
   }
 
   get canSchedule() {
-    return this.streamingService.views.supports('stream-schedule');
+    const streamingView = this.streamingService.views;
+    return streamingView.supports('stream-schedule', streamingView.linkedPlatforms);
   }
 
   get youtubeEnabled() {
@@ -115,11 +118,7 @@ export default class StudioFooterComponent extends Vue {
   }
 
   openScheduleStream() {
-    this.windowsService.showWindow({
-      componentName: 'ScheduleStreamWindow',
-      title: $t('Schedule Stream'),
-      size: { width: 800, height: 670 },
-    });
+    this.navigationService.navigate('StreamScheduler');
   }
 
   confirmYoutubeEnabled() {

@@ -2,7 +2,6 @@ import { click, focusChild, focusMain, TExecutionContext } from './index';
 import { setOutputResolution } from './output';
 import { fillForm, FormMonkey, TFormMonkeyData } from '../form-monkey';
 import { getClient } from '../api-client';
-import moment = require('moment');
 import { StreamSettingsService } from '../../../app/services/settings/streaming';
 import { sleep } from '../sleep';
 import { showSettings } from "./settings";
@@ -93,32 +92,6 @@ export async function waitForStreamStop(t: TExecutionContext) {
   } catch (e) {
     throw new Error(`Stream did not stop in ${ms}ms`);
   }
-}
-
-/**
- * Schedule stream for platforms that supports scheduling
- */
-export async function scheduleStream(
-  t: TExecutionContext,
-  date: number,
-  channelInfo?: Dictionary<string>,
-) {
-  const app = t.context.app;
-  await focusMain(t);
-  await click(t, 'button .icon-date');
-  await focusChild(t);
-
-  // wait fields to be shown
-  await (await app.client.$('[data-name=title]')).waitForDisplayed();
-
-  await fillForm(t, null, {
-    ...channelInfo,
-    date: moment(date).format('MM/DD/YYYY'),
-  });
-  await click(t, 'button=Done');
-
-  // the success message should be shown
-  await (await app.client.$('.toast-success')).waitForDisplayed({ timeout: 20000 });
 }
 
 export async function chatIsVisible(t: TExecutionContext) {

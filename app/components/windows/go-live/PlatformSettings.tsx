@@ -18,6 +18,7 @@ import Section from './Section';
 
 class Props {
   isScheduleMode?: boolean = false;
+  isUpdateMode?: boolean = false;
 }
 /**
  * Renders the form with stream settings for each enabled platform
@@ -82,7 +83,6 @@ export default class PlatformSettings extends TsxComponent<Props> {
   private renderPlatformSettings(platform: TPlatform) {
     const isAdvancedMode = this.view.savedSettings.advancedMode && this.view.isMultiplatformMode;
     const title = $t('%{platform} Settings', { platform: this.getPlatformName(platform) });
-    const isLive = this.view.isMidStreamMode;
     return (
       <Section title={title} isSimpleMode={!isAdvancedMode}>
         {platform === 'twitch' && <TwitchEditStreamInfo vModel={this.settings} />}
@@ -90,7 +90,7 @@ export default class PlatformSettings extends TsxComponent<Props> {
           <FacebookEditStreamInfo
             vModel={this.settings}
             isScheduleMode={this.props.isScheduleMode}
-            isUpdateMode={isLive}
+            isUpdateMode={this.props.isUpdateMode}
           />
         )}
         {platform === 'youtube' && (

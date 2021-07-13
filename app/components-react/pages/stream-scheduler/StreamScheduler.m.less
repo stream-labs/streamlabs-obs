@@ -1,0 +1,61 @@
+@import "../../../styles/index.less";
+
+// the Foundation library interferes with some calendar styles
+// so we need to add some css fixes here
+.stream-scheduler-page {
+  padding: 8px;
+
+  // set padding for calendar header
+  :global(.ant-picker-calendar-full .ant-picker-panel .ant-picker-body th) {
+    padding: 0 8px 5px 0;
+  }
+
+  // remove weird margin in cells
+  :global(.ant-picker-calendar-full .ant-picker-panel .ant-picker-calendar-date) {
+    margin: 0;
+  }
+
+  // overwrite text align from foundation
+  :global(th) {text-align: right}
+
+  :global(.ant-modal-wrap), :global(.ant-modal-mask) {
+    position: absolute;
+  }
+
+  // hide month/year mode selector
+  :global(.ant-picker-calendar-mode-switch)  {display: none;}
+}
+
+.event {
+  .radius();
+  padding: 0 4px;
+  margin-bottom: 4px;
+  margin-right: 8px;
+  cursor: pointer;
+  color: var(--gray-400);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  text-align: left;
+}
+
+.event--facebook {
+  background-color: var(--facebook-transparent);
+  &:hover {
+    color: white;
+  }
+}
+
+.event--youtube {
+  background-color: var(--youtube-transparent);
+  &:hover {
+    color: white;
+  }
+}
+
+.event-time {}
+
+.event-title {
+  font-weight: bold;
+}
+

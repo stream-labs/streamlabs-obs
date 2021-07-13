@@ -5,14 +5,9 @@ import {
   clickGoLive,
   goLive,
   prepareToGoLive,
-  scheduleStream,
   stopStream,
-  submit,
-  waitForStreamStart,
 } from '../../helpers/spectron/streaming';
 import { FormMonkey, selectTitle } from '../../helpers/form-monkey';
-import moment = require('moment');
-import { sleep } from '../../helpers/sleep';
 
 useSpectron();
 
@@ -30,32 +25,9 @@ test('Streaming to Youtube', async t => {
   await stopStream(t);
 });
 
-test('Streaming to the scheduled event on Youtube', async t => {
-  await logIn(t, 'youtube', { multistream: false });
-
-  // create event via scheduling form
-  const tomorrow = Date.now() + 1000 * 60 * 60 * 24;
-  const formattedTomorrow = moment(tomorrow).format(moment.localeData().longDateFormat('ll'));
-  await scheduleStream(t, tomorrow, {
-    title: 'Youtube Test Stream',
-    description: 'SLOBS Test Stream Description',
-  });
-
-  // select event and go live
-  await prepareToGoLive(t);
-  await clickGoLive(t);
-
-  await sleep(2000);
-
-  const form = new FormMonkey(t);
-  await form.fill({
-    event: await form.getOptionByTitle('event', `Youtube Test Stream (${formattedTomorrow})`),
-  });
-
-  await submit(t);
-  await waitForStreamStart(t);
-  await stopStream(t);
-  t.pass();
+// TODO
+test.skip('Streaming to the scheduled event on Youtube', async t => {
+  /// await logIn(t, 'youtube', { multistream: false });
 });
 
 test('Start stream twice to the same YT event', async t => {

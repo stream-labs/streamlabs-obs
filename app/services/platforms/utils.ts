@@ -17,7 +17,13 @@ export interface IPlatformResponse<TResult = unknown> {
 export async function handlePlatformResponse(response: Response): Promise<any> {
   const contentType = response.headers.get('content-type');
   const isJson = contentType && contentType.includes('application/json');
-  const result = await (isJson ? response.json() : response.text());
+  let result: unknown;
+  try {
+    // Youtube API can return an empty content for a 'DELETE' request even if the content-type is application/json
+    result = await (isJson ? response.json() : response.text());
+  } catch (e) {
+    result = '';
+  }
   const serializedResponse = { ok: response.ok, url: response.url, status: response.status };
   return response.ok
     ? result

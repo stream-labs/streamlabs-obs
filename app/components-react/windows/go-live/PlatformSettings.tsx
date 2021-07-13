@@ -8,8 +8,13 @@ import { Section } from './Section';
 import { YoutubeEditStreamInfo } from './platforms/YoutubeEditStreamInfo';
 import FacebookEditStreamInfo from './platforms/FacebookEditStreamInfo';
 import { TiktokEditStreamInfo } from './platforms/TiktokEditStreamInfo';
-import { IPlatformComponentParams, TLayoutMode } from './platforms/PlatformSettingsLayout';
-import { getDefined } from '../../../util/properties-type-guards';
+import {
+  IPlatformComponentParams,
+  IPlatformSettings,
+  TLayoutMode
+} from './platforms/PlatformSettingsLayout';
+import {assertIsDefined, getDefined} from '../../../util/properties-type-guards';
+import {IGoLiveSettings} from "../../../services/streaming";
 
 export default function PlatformSettings() {
   const {

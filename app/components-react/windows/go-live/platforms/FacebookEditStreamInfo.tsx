@@ -71,6 +71,7 @@ export default function FacebookEditStreamInfo(p: IPlatformComponentParams<'face
   const shouldShowPrivacyWarn =
     (!fbSettings.liveVideoId && fbSettings.privacy?.value !== 'SELF') ||
     (fbSettings.liveVideoId && fbSettings.privacy?.value);
+  const shouldShowGame = !isUpdateMode;
 
   function updateSettings(patch: Partial<IFacebookStartStreamOptions>) {
     p.onChange({ ...fbSettings, ...patch });
@@ -109,6 +110,7 @@ export default function FacebookEditStreamInfo(p: IPlatformComponentParams<'face
       scheduledVideos: await FacebookService.actions.return.fetchScheduledVideos(
         destinationType,
         destinationId,
+        true,
       ),
       scheduledVideosLoaded: true,
     });
@@ -163,7 +165,7 @@ export default function FacebookEditStreamInfo(p: IPlatformComponentParams<'face
 
     // we cant read the privacy property of already created video
     if (fbSettings.liveVideoId || isUpdateMode) {
-      options.unshift({ value: '', title: $t('Do not change privacy settings') });
+      options.unshift({ value: '', label: $t('Do not change privacy settings') });
     }
     return options;
   }
@@ -225,6 +227,7 @@ export default function FacebookEditStreamInfo(p: IPlatformComponentParams<'face
                     label: group.name,
                     image: s.pictures[group.id],
                   }))}
+                  defaultActiveFirstOption
                   onDropdownVisibleChange={() => loadPictures('group')}
                   extra={
                     <p>
@@ -288,17 +291,19 @@ export default function FacebookEditStreamInfo(p: IPlatformComponentParams<'face
           />
         )}
 
-        <GameSelector
-          {...bind.game}
-          platform="facebook"
-          extra={
-            shouldShowGamingWarning && (
-              <Translate message={$t('facebookGamingWarning')}>
-                <a slot="createPageLink" onClick={() => FacebookService.actions.createFBPage()} />
-              </Translate>
-            )
-          }
-        />
+        {shouldShowGame && (
+          <GameSelector
+            {...bind.game}
+            platform="facebook"
+            extra={
+              shouldShowGamingWarning && (
+                <Translate message={$t('facebookGamingWarning')}>
+                  <a slot="createPageLink" onClick={() => FacebookService.actions.createFBPage()} />
+                </Translate>
+              )
+            }
+          />
+        )}
       </div>
     );
   }

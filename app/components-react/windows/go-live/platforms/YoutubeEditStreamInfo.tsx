@@ -44,7 +44,7 @@ export const YoutubeEditStreamInfo = InputComponent((p: IPlatformComponentParams
     async () => {
       return {
         broadcastLoading: false,
-        broadcasts: await YoutubeService.actions.return.fetchBroadcasts(),
+        broadcasts: await YoutubeService.actions.return.fetchEligibleBroadcasts(),
       };
     },
   );

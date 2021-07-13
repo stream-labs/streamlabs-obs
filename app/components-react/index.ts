@@ -14,6 +14,7 @@ import Loader from './pages/Loader';
 import NavTools from './sidebar/NavTools';
 import PlatformLogo from './shared/PlatformLogo';
 import AdvancedStatistics from './windows/AdvancedStatistics';
+import StreamScheduler from './pages/stream-scheduler/StreamScheduler';
 import { createRoot } from './root/ReactRoot';
 import StartStreamingButton from './root/StartStreamingButton';
 import TestWidgets from './root/TestWidgets';
@@ -36,6 +37,7 @@ export const components = {
   Loader,
   NavTools,
   PlatformLogo,
+  StreamScheduler: createRoot(StreamScheduler),
   AdvancedStatistics,
   StartStreamingButton,
   TestWidgets,

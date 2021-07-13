@@ -16,6 +16,7 @@ const ANT_SELECT_FEATURES = [
   'onSearch',
   'onSelect',
   'allowClear',
+  'defaultActiveFirstOption',
 ] as const;
 
 // define custom props
