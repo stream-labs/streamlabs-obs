@@ -6,6 +6,12 @@
         <button class="button" @click="repairSceneCollection()">Repair Scene Collection</button>
         <br />
         <br />
+        <br />
+        <button class="button button--action" @click="showDemoComponents()">
+          Show Shared Components Library
+        </button>
+        <br />
+        <br />
       </div>
     </div>
   </div>

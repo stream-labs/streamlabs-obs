@@ -60,7 +60,7 @@ const LANG_CODE_MAP: Dictionary<{ lang: string; locale: string }> = {
   'zh-CN': { lang: 'Chinese (Simplified)', locale: 'zh-CN' },
 };
 
-const WHITE_LIST = [
+export const WHITE_LIST = [
   'en-US',
   'ru-RU',
   'zh-TW',

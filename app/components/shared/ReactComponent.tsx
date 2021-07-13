@@ -164,6 +164,15 @@ export class PlatformLogo extends ReactComponent<{
   color?: string;
   unwrapped?: boolean;
 }> {}
+
+@Component({
+  props: {
+    name: { default: 'SharedComponentsLibrary' },
+    wrapperStyles: { default: () => ({ height: '100%' }) },
+  },
+})
+export class SharedComponentsLibrary extends ReactComponent {}
+
 @Component({
   props: {
     name: { default: 'RenameSource' },

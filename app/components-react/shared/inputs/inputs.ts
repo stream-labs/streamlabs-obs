@@ -19,6 +19,7 @@ type TInputType =
   | 'list'
   | 'tags'
   | 'switch'
+  | 'date'
   | 'slider'
   | 'image';
 

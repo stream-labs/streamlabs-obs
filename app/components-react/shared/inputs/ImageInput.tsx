@@ -75,7 +75,7 @@ export const ImageInput = InputComponent((p: TImageInputProps) => {
       alertAsync(error);
       // a hack for removing this file from the list
       // @see https://ant.design/components/upload/#components-upload-demo-upload-png-only
-      return Upload.LIST_IGNORE as boolean;
+      return (Upload.LIST_IGNORE as unknown) as boolean;
     }
 
     getBase64(file).then(previewImage => {

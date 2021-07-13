@@ -8,7 +8,7 @@ import path from 'path';
 import { Button, Progress, Alert } from 'antd';
 import YoutubeUpload from './YoutubeUpload';
 import { RadioInput } from 'components-react/shared/inputs/RadioInput';
-import { confirm } from 'components-react/modals';
+import { confirmAsync } from 'components-react/modals';
 
 export default function ExportModal(p: { close: () => void }) {
   const { HighlighterService, UsageStatisticsService } = Services;
@@ -117,7 +117,7 @@ export default function ExportModal(p: { close: () => void }) {
               onClick={async () => {
                 if (await HighlighterService.actions.return.fileExists(exportFile)) {
                   if (
-                    !(await confirm({
+                    !(await confirmAsync({
                       title: 'Overwite File?',
                       content: `${path.basename(
                         exportFile,

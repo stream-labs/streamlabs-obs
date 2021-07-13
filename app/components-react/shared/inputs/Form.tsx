@@ -1,4 +1,4 @@
-import React, { useContext, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import { Form as AntForm } from 'antd';
 import { FormInstance, FormProps, FormItemProps } from 'antd/lib/form';
 import { TInputLayout } from './inputs';
@@ -19,7 +19,7 @@ export const FormContext = React.createContext<TFormContext | null>(null);
 export default React.memo(function Form(p: FormProps & { disabled?: boolean }) {
   const context = useContext(FormContext);
   const [antForm] = AntForm.useForm(context?.antForm || p.form);
-  const [contextValue] = useState(() => {
+  const [contextValue, setContextValue] = useState(() => {
     // set default layout to horizontal
     const layout = p.layout || 'horizontal';
     return {
@@ -27,6 +27,11 @@ export default React.memo(function Form(p: FormProps & { disabled?: boolean }) {
       antForm,
     };
   });
+
+  useEffect(() => {
+    const layout = p.layout || 'horizontal';
+    setContextValue(prevContext => ({ ...prevContext, layout }));
+  }, [p.layout]);
 
   // data attributes helps to find this form in DOM in tests
   const dataAttrs = {
