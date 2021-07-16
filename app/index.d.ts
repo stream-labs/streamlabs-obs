@@ -4,6 +4,9 @@
 // all global interfaces here
 
 declare const SLOBS_BUNDLE_ID: string;
+declare const SLOBS_SENTRY_URL_BE_SERVER: string;
+declare const SLOBS_SENTRY_URL_BE_CLIENT: string;
+declare const SLOBS_SENTRY_URL_FE_DSN: string;
 
 interface Dictionary<TItemType> {
   [key: string]: TItemType;

@@ -1,4 +1,5 @@
 /*global SLOBS_BUNDLE_ID*/
+/*global SLOBS_SENTRY_URL_BE_SERVER, SLOBS_SENTRY_URL_BE_CLIENT, SLOBS_SENTRY_URL_FE_DSN*/
 
 import { I18nService, $t } from 'services/i18n';
 
@@ -50,19 +51,12 @@ if (!isProduction) {
   process.title = `SLOBS Renderer ${windowId}`;
 }
 
-// This is the development DSN
-let sentryDsn = 'https://8f444a81edd446b69ce75421d5e91d4d@sentry.io/252950';
-
 if (isProduction) {
-  // This is the production DSN
-  sentryDsn = 'https://6971fa187bb64f58ab29ac514aa0eb3d@sentry.io/251674';
-
   electron.crashReporter.start({
     productName: 'streamlabs-obs',
     companyName: 'streamlabs',
     ignoreSystemCrashHandler: true,
-    submitURL:
-      'https://sentry.io/api/1283430/minidump/?sentry_key=01fc20f909124c8499b4972e9a5253f2',
+    submitURL: SLOBS_SENTRY_URL_BE_CLIENT,
     extra: {
       'sentry[release]': slobsVersion,
       windowId: Utils.getWindowId(),
@@ -131,7 +125,7 @@ if (isProduction || process.env.SLOBS_REPORT_TO_SENTRY) {
   const bundleNames = electron.ipcRenderer.sendSync('getBundleNames', bundles);
 
   Sentry.init({
-    dsn: sentryDsn,
+    dsn: SLOBS_SENTRY_URL_FE_DSN,
     release: `${slobsVersion}-${SLOBS_BUNDLE_ID}`,
     beforeSend: (event, hint) => {
       // Because our URLs are local files and not publicly
@@ -293,12 +287,12 @@ document.addEventListener('DOMContentLoaded', async () => {
     );
 
     await obsUserPluginsService.initialize();
-
     // Initialize OBS API
     const apiResult = obs.NodeObs.OBS_API_initAPI(
       'en-US',
       appService.appDataDirectory,
       electron.remote.process.env.SLOBS_VERSION,
+      SLOBS_SENTRY_URL_BE_SERVER,
     );
 
     if (apiResult !== obs.EVideoCodes.Success) {
