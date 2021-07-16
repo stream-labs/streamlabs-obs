@@ -7,5 +7,6 @@
   "Tweet when going live": "ライブ配信の開始時にツイート",
   "Unlink Twitter": "Twitter のリンクを解除",
   "Tweet & Go Live": "Tweet & ライブ配信を開始",
-  "Could not connect to Twitter": "Could not connect to Twitter"
+  "Could not connect to Twitter": "Could not connect to Twitter",
+  "Use Streamlabs URL": "Use Streamlabs URL"
 }
