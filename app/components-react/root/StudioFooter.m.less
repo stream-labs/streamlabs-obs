@@ -1,0 +1,155 @@
+@import '../../styles/index';
+
+.footer {
+  .padding-h-sides(2);
+  .padding-v-sides();
+
+  display: flex;
+  justify-content: space-between;
+  flex-direction: row;
+  align-items: center;
+  position: relative;
+  background-color: var(--section);
+  max-width: none;
+  flex: 0 0 auto;
+}
+
+.nav-right {
+  display: flex;
+  align-items: center;
+}
+
+.nav-item {
+  .margin-left(2);
+}
+
+.error-wrapper {
+  background-color: var(--section);
+  position: absolute;
+  z-index: 2;
+}
+
+.platform-error {
+  background: var(--warning-bg);
+  padding: 5px;
+  .radius();
+
+  i {
+    margin-left: 5px;
+    color: var(--warning);
+  }
+
+  span {
+    padding-left: 5px;
+    margin-right: 10px;
+    color: var(--warning);
+  }
+
+  .alert-button {
+    height: 18px;
+    line-height: 12px;
+    background: rgba(251, 72, 76, 0.36);
+    margin: 0 5px;
+    padding: 0 8px;
+    font-size: 10px;
+  }
+}
+
+.metrics-icon {
+  padding-right: 12px;
+
+  &:hover {
+    cursor: pointer;
+  }
+}
+
+.warning {
+  color: var(--warning);
+}
+
+.info {
+  color: var(--info);
+}
+
+.success {
+  color: var(--teal);
+}
+
+.record-button {
+  .weight(@bold);
+
+  position: relative;
+  width: 30px;
+  height: 30px;
+  background-color: var(--button);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 100%;
+  box-sizing: content-box;
+  letter-spacing: 0.2px;
+
+  span {
+    font-size: 10px;
+    color: var(--warning);
+  }
+
+  &:hover {
+    background-color: var(--button-hover);
+  }
+
+  &.active {
+    animation: pulse 2.5s linear infinite;
+    background-color: var(--warning);
+
+    span {
+      color: var(--white);
+    }
+  }
+
+  &:focus {
+    outline: none;
+  }
+}
+
+.record-time {
+  color: var(--warning);
+}
+
+@keyframes pulse {
+  0% {
+    box-shadow: 0 0 2px 0 rgba(252, 62, 63, 0.6);
+  }
+
+  70% {
+    box-shadow: 0 0 2px 4px rgba(252, 62, 63, 0.6);
+  }
+
+  100% {
+    box-shadow: 0 0 2px 4px rgba(252, 62, 63, 0);
+  }
+}
+
+.replay-button-group {
+  font-size: 0;
+  white-space: nowrap;
+  display: flex;
+
+  > button {
+    font-size: 12px;
+  }
+
+  > .left-replay {
+    border-radius: 100% 0 0 100%;
+  }
+
+  > .right-replay {
+    border-radius: 0 100% 100% 0;
+  }
+}
+
+.performance-metrics {
+  position: relative;
+  display: inline-flex;
+  background: var(--section) !important;
+}

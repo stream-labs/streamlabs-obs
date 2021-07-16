@@ -3,14 +3,14 @@ import Animation from 'rc-animate';
 import { Services } from '../service-provider';
 import { $t } from '../../services/i18n';
 
-export default function TestWidgets(p: { testers: string[] }) {
+export default function TestWidgets(p: { testers?: string[] }) {
   const { WidgetsService } = Services;
 
   const [slideOpen, setSlideOpen] = useState(false);
 
   const allTesters = WidgetsService.getTesters();
   const widgetTesters = p.testers
-    ? allTesters.filter(tester => p.testers.includes(tester.name))
+    ? allTesters.filter(tester => p.testers?.includes(tester.name))
     : allTesters;
 
   function test(testerName: string) {

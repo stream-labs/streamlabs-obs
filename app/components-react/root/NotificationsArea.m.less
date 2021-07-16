@@ -1,48 +1,4 @@
-<template>
-<div class="notifications-area" v-if="settings.enabled">
-  <div
-    class="notifications__counter notifications__counter--warning"
-    v-if="unreadCount"
-    v-tooltip.right="showUnreadNotificationsTooltip"
-    @click="showNotifications">
-    <span class="fa fa-exclamation-triangle"></span>
-    {{ unreadCount }}
-  </div>
-
-  <div
-    class="notifications__counter"
-    v-if="!unreadCount"
-    @click="showNotifications"
-    v-tooltip.right="showNotificationsTooltip">
-    <span class="icon-information"></span>
-  </div>
-
-  <div class="notifications__container flex--grow" ref="notificationsContainer">
-    <div
-      v-for="notify in notifications"
-      :key="`${notify.message}${notify.date}`"
-      class="notification"
-      v-show="showExtendedNotifications"
-      @click="onNotificationClickHandler(notify.id)"
-      :class="{
-        'info': notify.type === 'INFO',
-        'warning': notify.type == 'WARNING',
-        'has-action': notify.action && !notify.outdated,
-        'outdated': notify.outdated,
-        'success': notify.type == 'SUCCESS',
-      }"
-    >
-      {{ notify.message }} <span v-if="notify.showTime"> {{ moment(notify.date) }} </span>
-    </div>
-  </div>
-
-</div>
-</template>
-
-<script lang="ts" src="./NotificationsArea.vue.ts"></script>
-
-<style lang="less" scoped>
-@import '../styles/index';
+@import '../../styles/index';
 
 .notifications-area {
   overflow: hidden;
@@ -142,4 +98,3 @@
     display: none;
   }
 }
-</style>
