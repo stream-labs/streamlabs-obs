@@ -115,7 +115,7 @@
     "@types/overlayscrollbars": "1.12.0",
     "@types/react": "17.0.2",
     "@types/request": "2.48.5",
-    "@types/semver": "6.2.1",
+    "@types/semver": "6.2.2",
     "@types/socket.io-client": "1.4.32",
     "@types/sortablejs": "^1.10.6",
     "@types/tapable": "0.2.5",
