@@ -13,7 +13,7 @@ import { ICustomStreamDestination } from '../../../services/settings/streaming';
 import { WindowsService } from 'services/windows';
 import Translate from 'components/shared/translate';
 
-type TPlatforms = Record<TPlatform, { enabled: boolean }>;
+type TPlatforms = Partial<Record<TPlatform, { enabled: boolean }>>;
 
 class Props {
   title?: string = '';

@@ -274,7 +274,7 @@ export default class LiveDock extends Vue {
 
   get canEditChannelInfo(): boolean {
     return (
-      this.streamingService.state.info.checklist.startVideoTransmission === 'done' ||
+      this.streamingService.views.isMidStreamMode ||
       this.userService.state.auth?.primaryPlatform === 'twitch'
     );
   }

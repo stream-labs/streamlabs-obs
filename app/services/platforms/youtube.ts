@@ -8,15 +8,14 @@ import {
 } from '.';
 import { Inject } from 'services/core/injector';
 import { authorizedHeaders, jfetch } from 'util/requests';
-import { platformAuthorizedRequest, platformRequest } from './utils';
-import { StreamSettingsService } from 'services/settings/streaming';
+import { platformAuthorizedRequest } from './utils';
 import { CustomizationService } from 'services/customization';
 import { IGoLiveSettings } from 'services/streaming';
 import { WindowsService } from 'services/windows';
 import { I18nService } from 'services/i18n';
 import { throwStreamError } from 'services/streaming/stream-error';
 import { BasePlatformService } from './base-platform';
-import { assertIsDefined } from 'util/properties-type-guards';
+import { assertIsDefined, getDefined } from 'util/properties-type-guards';
 import electron from 'electron';
 import Utils from '../utils';
 import { YoutubeUploader } from './youtube/uploader';
@@ -267,7 +266,7 @@ export class YoutubeService
   }
 
   async beforeGoLive(settings: IGoLiveSettings) {
-    const ytSettings = settings.platforms.youtube;
+    const ytSettings = getDefined(settings.platforms.youtube);
     const streamToScheduledBroadcast = !!ytSettings.broadcastId;
     // update selected LiveBroadcast with new title and description
     // or create a new LiveBroadcast if there are no broadcasts selected

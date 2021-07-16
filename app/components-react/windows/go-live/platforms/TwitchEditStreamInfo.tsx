@@ -1,29 +1,38 @@
-import { useGoLiveSettings } from '../useGoLiveSettings';
-import CommonPlatformFields from '../CommonPlatformFields';
+import { CommonPlatformFields } from '../CommonPlatformFields';
 import React from 'react';
-import { createBinding } from '../../../shared/inputs';
 import { $t } from '../../../../services/i18n';
 import { TwitchTagsInput } from './TwitchTagsInput';
 import GameSelector from '../GameSelector';
 import Form from '../../../shared/inputs/Form';
+import PlatformSettingsLayout, { IPlatformComponentParams } from './PlatformSettingsLayout';
+import { createBinding } from '../../../shared/inputs';
+import { ITwitchStartStreamOptions } from '../../../../services/platforms/twitch';
 
-export function TwitchEditStreamInfo() {
-  const { updatePlatform, renderPlatformSettings, getSettings } = useGoLiveSettings(state => ({
-    twSettings: state.platforms.twitch,
-  }));
+export function TwitchEditStreamInfo(p: IPlatformComponentParams<'twitch'>) {
+  const twSettings = p.value;
 
-  const bind = createBinding(
-    () => getSettings().platforms.twitch,
-    updatedSettings => updatePlatform('twitch', updatedSettings),
-  );
+  function updateSettings(patch: Partial<ITwitchStartStreamOptions>) {
+    p.onChange({ ...twSettings, ...patch });
+  }
+
+  const bind = createBinding(twSettings, updatedSettings => updateSettings(updatedSettings));
 
   return (
     <Form name="twitch-settings">
-      {renderPlatformSettings(
-        <CommonPlatformFields key="common" platform="twitch" />,
-        <GameSelector key="required" platform={'twitch'} {...bind.game} />,
-        <TwitchTagsInput key="optional" label={$t('Twitch Tags')} {...bind.tags} />,
-      )}
+      <PlatformSettingsLayout
+        layoutMode={p.layoutMode}
+        commonFields={
+          <CommonPlatformFields
+            key="common"
+            platform="twitch"
+            layoutMode={p.layoutMode}
+            value={twSettings}
+            onChange={updateSettings}
+          />
+        }
+        requiredFields={<GameSelector key="required" platform={'twitch'} {...bind.game} />}
+        optionalFields={<TwitchTagsInput key="optional" label={$t('Twitch Tags')} {...bind.tags} />}
+      />
     </Form>
   );
 }

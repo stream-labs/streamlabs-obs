@@ -13,9 +13,9 @@ import Vue from 'vue';
 
 interface ISavedGoLiveSettings {
   platforms: {
-    twitch: IPlatformFlags;
-    facebook: IPlatformFlags;
-    youtube: IPlatformFlags;
+    twitch?: IPlatformFlags;
+    facebook?: IPlatformFlags;
+    youtube?: IPlatformFlags;
   };
   customDestinations?: ICustomStreamDestination[];
   advancedMode: boolean;

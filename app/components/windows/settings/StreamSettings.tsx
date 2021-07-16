@@ -101,7 +101,7 @@ export default class StreamSettings extends TsxComponent {
   }
 
   get customDestinations() {
-    return this.streamingService.views.savedSettings.customDestinations;
+    return this.streamingView.savedSettings.customDestinations;
   }
 
   private platformMerge(platform: TPlatform) {

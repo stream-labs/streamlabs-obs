@@ -52,7 +52,7 @@ export default function Loader() {
   );
 }
 
-function Spinner() {
+export function Spinner() {
   return (
     <div className="s-spinner s-spinner__overlay">
       <div className="s-bars">

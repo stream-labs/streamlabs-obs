@@ -1,18 +1,14 @@
-import moment from 'moment';
 import { ViewHandler } from '../core';
-import {
-  IGoLiveSettings,
-  IStreamingServiceState,
-  IStreamSettings,
-  EStreamingState,
-} from './streaming-api';
+import { IGoLiveSettings, IStreamSettings } from './streaming-api';
 import { StreamSettingsService } from '../settings/streaming';
 import { UserService } from '../user';
 import { RestreamService } from '../restream';
 import { getPlatformService, TPlatform, TPlatformCapability } from '../platforms';
-import { IncrementalRolloutService, TwitterService } from '../../app-services';
+import { TwitterService } from '../../app-services';
 import cloneDeep from 'lodash/cloneDeep';
 import difference from 'lodash/difference';
+import { Services } from '../../components-react/service-provider';
+import { getDefined } from '../../util/properties-type-guards';
 
 /**
  * The stream info view is responsible for keeping
@@ -20,13 +16,9 @@ import difference from 'lodash/difference';
  * channel and current stream in the Vuex store for
  * components to make use of.
  */
-export class StreamInfoView extends ViewHandler<IStreamingServiceState> {
-  constructor(state: IStreamingServiceState, private getGoLiveSettings?: () => IGoLiveSettings) {
-    super(state);
-  }
-
+export class StreamInfoView<T extends Object> extends ViewHandler<T> {
   get settings(): IGoLiveSettings {
-    return this.getGoLiveSettings ? this.getGoLiveSettings() : this.savedSettings;
+    return this.savedSettings;
   }
 
   private get userView() {
@@ -45,16 +37,16 @@ export class StreamInfoView extends ViewHandler<IStreamingServiceState> {
     return this.getServiceViews(TwitterService);
   }
 
-  private get incrementalRolloutView() {
-    return this.getServiceViews(IncrementalRolloutService);
+  private get streamingState() {
+    return Services.StreamingService.state;
   }
 
   get streamingStatus() {
-    return this.state.streamingStatus;
+    return this.streamingState.streamingStatus;
   }
 
   get info() {
-    return this.state.info;
+    return this.streamingState.info;
   }
 
   get error() {
@@ -87,7 +79,7 @@ export class StreamInfoView extends ViewHandler<IStreamingServiceState> {
 
   // REMOVE
   get warning(): string {
-    return this.state.info.warning;
+    return this.info.warning;
   }
 
   /**
@@ -124,7 +116,7 @@ export class StreamInfoView extends ViewHandler<IStreamingServiceState> {
    * Returns a list of enabled platforms with useCustomFields==false
    */
   get platformsWithoutCustomFields(): TPlatform[] {
-    return this.enabledPlatforms.filter(platform => !this.platforms[platform].useCustomFields);
+    return this.enabledPlatforms.filter(platform => !this.platforms[platform]!.useCustomFields);
   }
 
   checkEnabled(platform: TPlatform) {
@@ -137,7 +129,7 @@ export class StreamInfoView extends ViewHandler<IStreamingServiceState> {
   getEnabledPlatforms(platforms: IStreamSettings['platforms']): TPlatform[] {
     return Object.keys(platforms).filter(
       (platform: TPlatform) =>
-        this.linkedPlatforms.includes(platform) && platforms[platform].enabled,
+        this.linkedPlatforms.includes(platform) && platforms[platform]?.enabled,
     ) as TPlatform[];
   }
 
@@ -150,7 +142,7 @@ export class StreamInfoView extends ViewHandler<IStreamingServiceState> {
   }
 
   get isMidStreamMode(): boolean {
-    return this.state.streamingStatus !== 'offline';
+    return this.streamingState.streamingStatus !== 'offline';
   }
 
   /**
@@ -212,9 +204,9 @@ export class StreamInfoView extends ViewHandler<IStreamingServiceState> {
       game: '',
     };
     const destinations = Object.keys(platforms) as TPlatform[];
-    const enabledDestinations = destinations.filter(dest => platforms[dest].enabled);
+    const enabledDestinations = destinations.filter(dest => platforms[dest]?.enabled);
     const destinationsWithCommonSettings = enabledDestinations.filter(
-      dest => !platforms[dest].useCustomFields,
+      dest => !platforms[dest]!.useCustomFields,
     );
     const destinationWithCustomSettings = difference(
       enabledDestinations,
@@ -223,7 +215,7 @@ export class StreamInfoView extends ViewHandler<IStreamingServiceState> {
 
     // search fields in platforms that don't use custom settings first
     destinationsWithCommonSettings.forEach(platform => {
-      const destSettings = platforms[platform];
+      const destSettings = getDefined(platforms[platform]);
       Object.keys(commonFields).forEach(fieldName => {
         if (commonFields[fieldName] || !destSettings[fieldName]) return;
         commonFields[fieldName] = destSettings[fieldName];
@@ -232,7 +224,7 @@ export class StreamInfoView extends ViewHandler<IStreamingServiceState> {
 
     // search fields in platforms that have custom fields
     destinationWithCustomSettings.forEach(platform => {
-      const destSettings = platforms[platform];
+      const destSettings = getDefined(platforms[platform]);
       Object.keys(commonFields).forEach(fieldName => {
         if (commonFields[fieldName] || !destSettings[fieldName]) return;
         commonFields[fieldName] = destSettings[fieldName];
@@ -318,8 +310,8 @@ export class StreamInfoView extends ViewHandler<IStreamingServiceState> {
    * Return true if one of the checks has been failed
    */
   hasFailedChecks(): boolean {
-    return !!Object.keys(this.state.info.checklist).find(
-      check => this.state.info.checklist[check] === 'failed',
+    return !!Object.keys(this.info.checklist).find(
+      check => this.info.checklist[check] === 'failed',
     );
   }
 
@@ -327,8 +319,8 @@ export class StreamInfoView extends ViewHandler<IStreamingServiceState> {
    * Return true if one of the checks is in a pending state
    */
   hasPendingChecks(): boolean {
-    return !!Object.keys(this.state.info.checklist).find(
-      check => this.state.info.checklist[check] === 'pending',
+    return !!Object.keys(this.info.checklist).find(
+      check => this.info.checklist[check] === 'pending',
     );
   }
 

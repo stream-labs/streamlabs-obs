@@ -29,11 +29,11 @@ export default function GoLiveSettings() {
     isAdvancedMode,
     protectedModeEnabled,
     error,
-    canAddDestinations,
     isLoading,
-  } = useGoLiveSettings(view => {
-    const linkedPlatforms = view.linkedPlatforms;
-    const customDestinations = view.customDestinations;
+    canAddDestinations,
+  } = useGoLiveSettings().selectExtra(module => {
+    const linkedPlatforms = module.linkedPlatforms;
+    const customDestinations = module.customDestinations;
     return {
       canAddDestinations: linkedPlatforms.length + customDestinations.length < 5,
     };
@@ -45,6 +45,7 @@ export default function GoLiveSettings() {
   const shouldShowAddDestButton = canAddDestinations;
 
   function addDestination() {
+    // open the stream settings or prime page
     if (UserService.views.isPrime) {
       SettingsService.actions.showSettings('Stream');
     } else {

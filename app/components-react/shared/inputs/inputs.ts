@@ -9,6 +9,7 @@ import { FormItemProps } from 'antd/lib/form';
 import { CheckboxChangeEvent } from 'antd/lib/checkbox';
 import { $t } from '../../../services/i18n';
 import pick from 'lodash/pick';
+import isEqual from 'lodash/isEqual';
 
 type TInputType =
   | 'text'
@@ -96,6 +97,11 @@ export function useInput<
 >(type: TInputType, inputProps: TInputProps, antFeatures?: readonly string[]) {
   const { name, value, label } = inputProps;
 
+  // save input props to Ref
+  // so it will always be updated in `useCallback` calls
+  const inputPropsRef = useRef(inputProps);
+  inputPropsRef.current = inputProps;
+
   const uncontrolled = (() => {
     // inputs with debounce are always uncontrolled
     if (inputProps.debounce) return true;
@@ -120,7 +126,7 @@ export function useInput<
   const prevValueRef = useRef(value);
 
   // sync local value on props change
-  if (value !== prevValueRef.current) {
+  if (!isEqual(value, prevValueRef.current)) {
     localValueRef.current = value;
     prevValueRef.current = value;
   }
@@ -144,25 +150,27 @@ export function useInput<
 
   // create an `emitChange()` method and it's debounced version
   function emitChange(newVal: TValue) {
-    prevValueRef.current = newVal;
-    inputProps.onChange && inputProps.onChange(newVal);
+    if (uncontrolled) prevValueRef.current = newVal;
+    inputPropsRef.current.onChange && inputPropsRef.current.onChange(newVal);
   }
   const emitChangeDebounced = useDebounce(inputProps.debounce, emitChange);
 
   // create onChange handler
   const onChange = useCallback((newVal: TValue) => {
-    if (newVal === localValueRef.current) return;
-    localValueRef.current = newVal;
+    // if nothing changed then just ignore
+    if (isEqual(newVal, localValueRef.current)) return;
+    const props = inputPropsRef.current;
 
     // call forceUpdate if component is uncontrolled
     // controlled components should be updated automatically via props changing
     if (uncontrolled) {
+      localValueRef.current = newVal;
       forceUpdate();
     }
 
-    inputProps.onInput && inputProps.onInput(newVal);
-    if (!inputProps.onChange) return;
-    if (inputProps.debounce) {
+    props.onInput && props.onInput(newVal);
+    if (!props.onChange) return;
+    if (props.debounce) {
       emitChangeDebounced(newVal);
     } else {
       emitChange(newVal);
@@ -195,15 +203,20 @@ export function useInput<
       'nowrap',
       'layout',
       'rules',
+      'tooltip',
     ]),
     rules,
     'data-role': 'input-wrapper',
     name: inputId,
   };
 
+  // sync wrapperAttrs with ref
+  const wrapperAttrsRef = useRef(wrapperAttrs);
+  Object.assign(wrapperAttrsRef.current, wrapperAttrs);
+
   // pick props for the input element
   const inputAttrs = {
-    ...(pick(inputProps, 'disabled', 'placeholder', antFeatures || []) as {}),
+    ...(pick(inputProps, 'disabled', 'placeholder', 'size', antFeatures || []) as {}),
     ...dataAttrs,
     'data-role': 'input',
     name: inputId,
@@ -211,9 +224,13 @@ export function useInput<
     onChange,
   };
 
+  // sync inputAttrs with ref
+  const inputAttrsRef = useRef(inputAttrs);
+  Object.assign(inputAttrsRef.current, inputAttrs);
+
   return {
-    inputAttrs,
-    wrapperAttrs,
+    inputAttrs: inputAttrsRef.current,
+    wrapperAttrs: wrapperAttrsRef.current,
     forceUpdate,
     setLocalValue,
     emitChange,
@@ -262,13 +279,19 @@ export function useTextInput<
     p.onBlur && p.onBlur(ev);
   }, []);
 
+  const textInputAttrs = {
+    ...inputAttrs,
+    onChange,
+    onBlur,
+  };
+
+  // sync textInputAttrs with ref
+  const inputAttrsRef = useRef(textInputAttrs);
+  Object.assign(inputAttrsRef.current, textInputAttrs);
+
   return {
     wrapperAttrs,
-    inputAttrs: {
-      ...inputAttrs,
-      onChange,
-      onBlur,
-    },
+    inputAttrs: inputAttrsRef.current,
     originalOnChange: inputAttrs.onChange,
   };
 }
@@ -287,6 +310,10 @@ export function useTextInput<
  *   </form>
  *  }
  * </pre>
+ *
+ * @param stateGetter an object or function to read the field value from
+ * @param stateSetter a function that changes the field given field
+ * @param extraPropsGenerator a function that returns extra attributes for the input element (like disabled, placeholder,...)
  */
 export function createBinding<
   TState extends object,
@@ -294,7 +321,7 @@ export function createBinding<
   TExtraProps extends object = {}
 >(
   stateGetter: TState | (() => TState),
-  setter: (newTarget: Partial<TState>) => unknown,
+  stateSetter: (newTarget: Partial<TState>) => unknown,
   extraPropsGenerator?: (fieldName: keyof TState) => TExtraProps,
 ): TBindings<TState, TFieldName, TExtraProps> {
   function getState(): TState {
@@ -302,37 +329,60 @@ export function createBinding<
       ? (stateGetter as Function)()
       : (stateGetter as TState);
   }
-  return new Proxy(
-    {},
-    {
-      get(t, fieldName: string) {
-        const extraProps = extraPropsGenerator
-          ? extraPropsGenerator(fieldName as keyof TState)
-          : {};
-        return {
-          name: fieldName,
-          value: getState()[fieldName],
-          onChange(newVal: unknown) {
-            setter({ ...getState(), [fieldName]: newVal });
-          },
-          ...extraProps,
-        };
-      },
+
+  const metadata = {
+    _proxyName: 'Binding',
+    _binding: {
+      id: `binding__${uuid()}`,
+      dependencies: {} as Record<string, unknown>,
     },
-  ) as TBindings<TState, TFieldName, TExtraProps>;
+  };
+
+  return (new Proxy(metadata, {
+    get(t, fieldName: string) {
+      if (fieldName in metadata) return metadata[fieldName];
+      const fieldValue = getState()[fieldName];
+      // register the fieldName in the dependencies list
+      // that helps keep this binding up to date when use it inside ReduxModules
+      metadata._binding.dependencies[fieldName] = fieldValue;
+      const extraProps = extraPropsGenerator ? extraPropsGenerator(fieldName as keyof TState) : {};
+      return {
+        name: fieldName,
+        value: fieldValue,
+        onChange(newVal: unknown) {
+          const state = getState();
+          // if the state object has a defined setter than use the local setter
+          if (Object.getOwnPropertyDescriptor(state, fieldName)?.set) {
+            state[fieldName] = newVal;
+          } else {
+            stateSetter({ ...state, [fieldName]: newVal });
+          }
+        },
+        ...extraProps,
+      };
+    },
+  }) as unknown) as TBindings<TState, TFieldName, TExtraProps>;
 }
 
 export type TBindings<
-  TState extends object,
+  TState extends Object,
   TFieldName extends keyof TState,
-  TExtraProps extends object = {}
+  TExtraProps extends Object = {}
 > = {
   [K in TFieldName]: {
     name: K;
     value: TState[K];
     onChange: (newVal: TState[K]) => unknown;
-  } & TExtraProps;
-};
+  };
+} &
+  TExtraProps & {
+    _proxyName: 'Binding';
+    _binding: {
+      id: string;
+      dependencies: Record<TFieldName, unknown>;
+      clone: () => TBindings<TState, TFieldName, TExtraProps>;
+    };
+  };
 
 function createValidationRules(type: TInputType, inputProps: IInputCommonProps<unknown>) {
   const rules = inputProps.rules ? [...inputProps.rules] : [];
@@ -352,14 +402,18 @@ function createValidationRules(type: TInputType, inputProps: IInputCommonProps<u
 
 /**
  * Function for creating new input components
- * For performance optimization ignores changing of all function props like onChange and onInput
+ * Use the deep comparison algorithm for the `value` prop
  */
 export function InputComponent<T extends Function>(f: T): T {
   return (React.memo(f as any, (prevProps: any, newProps: any) => {
     const keys = Object.keys(newProps);
     if (keys.length !== Object.keys(prevProps).length) return false;
     for (const key of keys) {
-      if (typeof newProps[key] === 'function') continue;
+      // use deep comparison for the `value` prop
+      // because it could have an array type (For example TagsInput.value)
+      if (key === 'value' && !isEqual(newProps[key], prevProps[key])) return false;
+
+      // for other props use shallow comparison
       if (newProps[key] !== prevProps[key]) return false;
     }
     return true;

@@ -41,7 +41,7 @@ import { createStreamError, IStreamError, StreamError, TStreamErrorType } from '
 import { authorizedHeaders } from 'util/requests';
 import { HostsService } from '../hosts';
 import { TwitterService } from '../integrations/twitter';
-import { assertIsDefined } from 'util/properties-type-guards';
+import { assertIsDefined, getDefined } from 'util/properties-type-guards';
 import { StreamInfoView } from './streaming-view';
 import { GrowService } from 'services/grow/grow';
 
@@ -90,7 +90,7 @@ export class StreamingService
   recordingStatusChange = new Subject<ERecordingState>();
   replayBufferStatusChange = new Subject<EReplayBufferState>();
   replayBufferFileWrite = new Subject<string>();
-  streamInfoChanged = new Subject<StreamInfoView>();
+  streamInfoChanged = new Subject<StreamInfoView<any>>();
 
   // Dummy subscription for stream deck
   streamingStateChange = new Subject<void>();
@@ -422,7 +422,7 @@ export class StreamingService
 
     for (const platform of platforms) {
       const service = getPlatformService(platform);
-      const newSettings = settings.platforms[platform];
+      const newSettings = getDefined(settings.platforms[platform]);
       try {
         await this.runCheck(platform, () => service.putChannelInfo(newSettings));
       } catch (e: unknown) {
@@ -454,12 +454,12 @@ export class StreamingService
   async scheduleStream(settings: IStreamSettings, time: string) {
     const destinations = settings.platforms;
     const platforms = (Object.keys(destinations) as TPlatform[]).filter(
-      dest => destinations[dest].enabled && this.views.supports('stream-schedule', [dest]),
+      dest => destinations[dest]?.enabled && this.views.supports('stream-schedule', [dest]),
     ) as ('facebook' | 'youtube')[];
     for (const platform of platforms) {
       const service = getPlatformService(platform);
       assertIsDefined(service.scheduleStream);
-      await service.scheduleStream(time, destinations[platform]);
+      await service.scheduleStream(time, getDefined(destinations[platform]));
     }
   }
 

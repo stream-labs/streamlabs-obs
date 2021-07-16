@@ -3,6 +3,7 @@ import { BasePlatformService } from './base-platform';
 import { IPlatformCapabilityResolutionPreset, IPlatformState, TPlatformCapability } from './index';
 import { IGoLiveSettings } from '../streaming';
 import { WidgetType } from '../widgets';
+import { getDefined } from '../../util/properties-type-guards';
 
 export interface ITiktokStartStreamOptions {
   serverUrl: string;
@@ -49,7 +50,7 @@ export class TiktokService
   }
 
   async beforeGoLive(goLiveSettings: IGoLiveSettings) {
-    const ttSettings = goLiveSettings.platforms.tiktok;
+    const ttSettings = getDefined(goLiveSettings.platforms.tiktok);
     if (!this.streamingService.views.isMultiplatformMode) {
       this.streamSettingsService.setSettings({
         streamType: 'rtmp_custom',

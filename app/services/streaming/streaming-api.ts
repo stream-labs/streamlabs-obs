@@ -55,10 +55,10 @@ export type TGoLiveChecklistItemState = 'not-started' | 'pending' | 'done' | 'fa
 
 export interface IStreamSettings {
   platforms: {
-    twitch: IPlatformFlags & ITwitchStartStreamOptions;
-    youtube: IPlatformFlags & IYoutubeStartStreamOptions;
-    facebook: IPlatformFlags & IFacebookStartStreamOptions;
-    tiktok: IPlatformFlags & ITiktokStartStreamOptions;
+    twitch?: IPlatformFlags & ITwitchStartStreamOptions;
+    youtube?: IPlatformFlags & IYoutubeStartStreamOptions;
+    facebook?: IPlatformFlags & IFacebookStartStreamOptions;
+    tiktok?: IPlatformFlags & ITiktokStartStreamOptions;
   };
   customDestinations: ICustomStreamDestination[];
   advancedMode: boolean;

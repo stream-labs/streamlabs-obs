@@ -62,3 +62,8 @@ export function assertIsDefined<T>(val: T): asserts val is NonNullable<T> {
   }
   return null;
 }
+
+export function getDefined<T>(val: T): NonNullable<T> {
+  assertIsDefined(val);
+  return val;
+}

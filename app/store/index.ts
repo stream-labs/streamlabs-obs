@@ -121,7 +121,6 @@ export function createStore(): Store<any> {
 export function commitMutation(mutation: IMutation) {
   if (appliedForeignMutations.has(mutation.id)) return;
   appliedForeignMutations.add(mutation.id);
-
   store.commit(
     mutation.type,
     Object.assign({}, mutation.payload, {

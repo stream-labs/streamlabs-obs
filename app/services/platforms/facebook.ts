@@ -19,7 +19,7 @@ import { throwStreamError } from 'services/streaming/stream-error';
 import { BasePlatformService } from './base-platform';
 import electron from 'electron';
 import { WindowsService } from '../windows';
-import { assertIsDefined } from '../../util/properties-type-guards';
+import { assertIsDefined, getDefined } from '../../util/properties-type-guards';
 
 interface IFacebookPage {
   access_token: string;
@@ -210,7 +210,7 @@ export class FacebookService
   }
 
   async beforeGoLive(options: IGoLiveSettings) {
-    const fbOptions = options.platforms.facebook;
+    const fbOptions = getDefined(options.platforms.facebook);
 
     let liveVideo: IFacebookLiveVideo;
     if (fbOptions.liveVideoId) {

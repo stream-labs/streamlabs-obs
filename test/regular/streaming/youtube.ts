@@ -44,10 +44,14 @@ test('Streaming to the scheduled event on Youtube', async t => {
   // select event and go live
   await prepareToGoLive(t);
   await clickGoLive(t);
+
+  await sleep(2000);
+
   const form = new FormMonkey(t);
   await form.fill({
     event: await form.getOptionByTitle('event', `Youtube Test Stream (${formattedTomorrow})`),
   });
+
   await submit(t);
   await waitForStreamStart(t);
   await stopStream(t);

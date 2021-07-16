@@ -17,10 +17,7 @@ import GoLiveError from './GoLiveError';
 
 export default function EditStreamWindow() {
   const { StreamingService, WindowsService } = Services;
-  const form = useForm();
   const {
-    contextValue,
-    Context: GoLiveSettingsContext,
     error,
     lifecycle,
     isMultiplatformMode,
@@ -29,7 +26,8 @@ export default function EditStreamWindow() {
     switchAdvancedMode,
     prepopulate,
     isLoading,
-  } = useGoLiveSettings(undefined, { isUpdateMode: true });
+    form,
+  } = useGoLiveSettings({ isUpdateMode: true }).select();
 
   const shouldShowChecklist = lifecycle === 'runChecklist';
   const shouldShowSettings = !shouldShowChecklist;
@@ -85,29 +83,27 @@ export default function EditStreamWindow() {
   }
 
   return (
-    <GoLiveSettingsContext.Provider value={contextValue}>
-      <ModalLayout footer={renderFooter()}>
-        <Form
-          form={form}
-          style={{ position: 'relative', height: '100%' }}
-          layout="horizontal"
-          name="editStreamForm"
-        >
-          <Spinner visible={isLoading} />
-          <Animation transitionName="fade">
-            {/* STEP 1 - FILL OUT THE SETTINGS FORM */}
-            {shouldShowSettings && (
-              <Scrollable key={'settings'} style={{ maxHeight: '100%' }} snapToWindowEdge>
-                <GoLiveError />
-                <PlatformSettings />
-              </Scrollable>
-            )}
+    <ModalLayout footer={renderFooter()}>
+      <Form
+        form={form}
+        style={{ position: 'relative', height: '100%' }}
+        layout="horizontal"
+        name="editStreamForm"
+      >
+        <Spinner visible={isLoading} />
+        <Animation transitionName="fade">
+          {/* STEP 1 - FILL OUT THE SETTINGS FORM */}
+          {shouldShowSettings && (
+            <Scrollable key={'settings'} style={{ maxHeight: '100%' }} snapToWindowEdge>
+              <GoLiveError />
+              <PlatformSettings />
+            </Scrollable>
+          )}
 
-            {/* STEP 2 - RUN THE CHECKLIST */}
-            {shouldShowChecklist && <GoLiveChecklist className={styles.page} key={'checklist'} />}
-          </Animation>
-        </Form>
-      </ModalLayout>
-    </GoLiveSettingsContext.Provider>
+          {/* STEP 2 - RUN THE CHECKLIST */}
+          {shouldShowChecklist && <GoLiveChecklist className={styles.page} key={'checklist'} />}
+        </Animation>
+      </Form>
+    </ModalLayout>
   );
 }

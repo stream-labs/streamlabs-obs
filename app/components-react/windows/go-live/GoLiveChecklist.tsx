@@ -15,28 +15,22 @@ import Utils from '../../../services/utils';
  * Shows transition to live progress and helps troubleshoot related problems
  */
 export default function GoLiveChecklist(p: HTMLAttributes<unknown>) {
-  const {
-    StreamingService,
-    VideoEncodingOptimizationService,
-    TwitterService,
-    WindowsService,
-  } = Services;
+  const { VideoEncodingOptimizationService, TwitterService, WindowsService } = Services;
   const {
     error,
     enabledPlatforms,
     lifecycle,
     isMultiplatformMode,
-    shouldShowOptimizedProfile,
-    shouldPostTweet,
     checklist,
     warning,
     getPlatformDisplayName,
     isUpdateMode,
-  } = useGoLiveSettings(view => ({
+    shouldShowOptimizedProfile,
+    shouldPostTweet,
+  } = useGoLiveSettings().selectExtra(module => ({
     shouldShowOptimizedProfile:
-      VideoEncodingOptimizationService.state.useOptimizedProfile && !view.isUpdateMode,
-    shouldPostTweet: !view.isUpdateMode && TwitterService.state.tweetWhenGoingLive,
-    delayEnabled: StreamingService.delayEnabled,
+      VideoEncodingOptimizationService.state.useOptimizedProfile && !module.isUpdateMode,
+    shouldPostTweet: !module.isUpdateMode && TwitterService.state.tweetWhenGoingLive,
   }));
 
   const success = lifecycle === 'live';
