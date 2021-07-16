@@ -66,6 +66,7 @@ export default class Projector extends Vue {
     this.windowsService.setOneOffFullscreen(this.windowId, true);
     this.oldBounds = currentWindow.getBounds();
     currentWindow.setPosition(display.bounds.x, display.bounds.y);
+    currentWindow.fullScreenable = true;
     currentWindow.setFullScreen(true);
     document.addEventListener('keydown', this.exitFullscreen);
   }
