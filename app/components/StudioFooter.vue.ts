@@ -6,8 +6,8 @@ import {
   PerformanceMetrics,
   StartStreamingButton,
   TestWidgets,
+  NotificationsArea,
 } from 'components/shared/ReactComponent';
-import NotificationsArea from './NotificationsArea.vue';
 import { UserService } from '../services/user';
 import { getPlatformService } from 'services/platforms';
 import { YoutubeService } from 'services/platforms/youtube';
