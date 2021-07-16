@@ -168,12 +168,15 @@ export class ExternalApiService extends RpcApi {
 
     // return error if there are not enough points
     if (this.points < costPerSecond) {
-      return this.jsonrpc.createError(request, {
-        code: E_JSON_RPC_ERROR.INVALID_REQUEST,
-        message: `Reached the limit of calls for "${resourceName}.${methodName}"${
-          comment ? ' ' + comment : ''
-        }`,
-      });
+      return this.jsonrpc.createError(
+        {
+          code: E_JSON_RPC_ERROR.INVALID_REQUEST,
+          message: `Reached the limit of calls for "${resourceName}.${methodName}"${
+            comment ? ' ' + comment : ''
+          }`,
+        },
+        request,
+      );
     }
 
     // extract points and call the base method

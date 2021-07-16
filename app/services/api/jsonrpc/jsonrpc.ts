@@ -10,22 +10,14 @@ import uuid from 'uuid/v4';
 
 export class JsonrpcService extends Service implements IJsonrpcServiceApi {
   static createError(
-    requestOrRequestId: string | IJsonRpcRequest,
     options: { code: E_JSON_RPC_ERROR; message?: string },
+    request?: IJsonRpcRequest,
   ): IJsonRpcResponse<any> {
-    /* eslint-disable */
-    const id =
-      arguments[0] && typeof arguments[0] === 'object'
-        ? (arguments[0] as IJsonRpcRequest).id
-        : arguments[0];
-
-    /* eslint-enable */
     return {
-      id,
+      id: request?.id || null,
       jsonrpc: '2.0',
       error: {
         code: options.code,
-        // tslint:disable-next-line:prefer-template
         message: E_JSON_RPC_ERROR[options.code] + (options.message ? ' ' + options.message : ''),
       },
     };
@@ -60,16 +52,14 @@ export class JsonrpcService extends Service implements IJsonrpcServiceApi {
   }
 
   static createResponse<TResult>(
-    requestOrRequestId: string | IJsonRpcRequest,
+    request?: IJsonRpcRequest,
     result: TResult = null,
   ): IJsonRpcResponse<TResult> {
-    /* eslint-disable */
-    const id =
-      arguments[0] && typeof arguments[0] === 'object'
-        ? (arguments[0] as IJsonRpcRequest).id
-        : arguments[0];
-    /* eslint-enable */
-    return { id, result, jsonrpc: '2.0' } as IJsonRpcResponse<TResult>;
+    return {
+      jsonrpc: '2.0',
+      id: request?.id || null,
+      result,
+    } as IJsonRpcResponse<TResult>;
   }
 
   static createEvent(options: {
@@ -78,23 +68,21 @@ export class JsonrpcService extends Service implements IJsonrpcServiceApi {
     data: any;
     isRejected?: boolean;
   }): IJsonRpcResponse<IJsonRpcEvent> {
-    return this.createResponse<IJsonRpcEvent>(null, {
+    return this.createResponse<IJsonRpcEvent>(undefined, {
       _type: 'EVENT',
       ...options,
     });
   }
 
   createError(
-    requestOrRequestId: string | IJsonRpcRequest,
     options: { code: E_JSON_RPC_ERROR; message?: string },
+    request?: IJsonRpcRequest,
   ): IJsonRpcResponse<any> {
-    // eslint-disable-next-line
-    return JsonrpcService.createError.apply(this, arguments);
+    return JsonrpcService.createError.apply(this, [options, request]);
   }
 
   createRequest(resourceId: string, method: string, ...args: any[]): IJsonRpcRequest {
-    // eslint-disable-next-line
-    return JsonrpcService.createRequest.apply(this, arguments);
+    return JsonrpcService.createRequest.apply(this, [resourceId, method, args]);
   }
 
   createRequestWithOptions(
@@ -103,16 +91,14 @@ export class JsonrpcService extends Service implements IJsonrpcServiceApi {
     options: { compactMode: boolean; fetchMutations: boolean },
     ...args: any[]
   ): IJsonRpcRequest {
-    // eslint-disable-next-line
-    return JsonrpcService.createRequestWithOptions.apply(this, arguments);
+    return JsonrpcService.createRequestWithOptions.apply(this, [resourceId, method, options, args]);
   }
 
   createResponse<TResult>(
-    requestOrRequestId: string | IJsonRpcRequest,
-    result: TResult,
+    request?: IJsonRpcRequest,
+    result: TResult = null,
   ): IJsonRpcResponse<TResult> {
-    // eslint-disable-next-line
-    return JsonrpcService.createResponse.apply(this, arguments);
+    return JsonrpcService.createResponse.apply(this, [result, request]);
   }
 
   createEvent(options: {
@@ -121,7 +107,6 @@ export class JsonrpcService extends Service implements IJsonrpcServiceApi {
     data: any;
     isRejected?: boolean;
   }): IJsonRpcResponse<IJsonRpcEvent> {
-    // eslint-disable-next-line
-    return JsonrpcService.createResponse.apply(this, arguments);
+    return JsonrpcService.createEvent.apply(this, options);
   }
 }

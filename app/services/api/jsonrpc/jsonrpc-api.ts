@@ -12,7 +12,7 @@ export enum E_JSON_RPC_ERROR {
 
 export interface IJsonRpcRequest {
   jsonrpc: '2.0';
-  id: string;
+  id?: string | number | null;
   method: string;
   params: {
     resource: string;
@@ -26,7 +26,7 @@ export interface IJsonRpcRequest {
 
 export interface IJsonRpcResponse<TResponse> {
   jsonrpc: '2.0';
-  id?: string | number;
+  id: string | number | null;
   result?: TResponse;
   error?: {
     code: number;

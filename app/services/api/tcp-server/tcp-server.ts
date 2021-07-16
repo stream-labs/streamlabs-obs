@@ -354,7 +354,7 @@ export class TcpServerService
     if (this.isRequestsHandlingStopped && !this.forceRequests) {
       this.sendResponse(
         client,
-        this.jsonrpcService.createError(null, {
+        this.jsonrpcService.createError({
           code: E_JSON_RPC_ERROR.INTERNAL_JSON_RPC_ERROR,
           message: 'API server is busy. Try again later',
         }),
@@ -373,10 +373,13 @@ export class TcpServerService
         const errorMessage = this.validateRequest(request);
 
         if (errorMessage) {
-          const errorResponse = this.jsonrpcService.createError(request, {
-            code: E_JSON_RPC_ERROR.INVALID_PARAMS,
-            message: errorMessage,
-          });
+          const errorResponse = this.jsonrpcService.createError(
+            {
+              code: E_JSON_RPC_ERROR.INVALID_PARAMS,
+              message: errorMessage,
+            },
+            request,
+          );
           this.sendResponse(client, errorResponse);
           return;
         }
@@ -398,7 +401,7 @@ export class TcpServerService
       } catch (e: unknown) {
         this.sendResponse(
           client,
-          this.jsonrpcService.createError(null, {
+          this.jsonrpcService.createError({
             code: E_JSON_RPC_ERROR.INVALID_REQUEST,
             message:
               'Make sure that the request is valid json. ' +
@@ -454,10 +457,13 @@ export class TcpServerService
       } else {
         this.sendResponse(
           client,
-          this.jsonrpcService.createError(request, {
-            code: E_JSON_RPC_ERROR.INTERNAL_JSON_RPC_ERROR,
-            message: 'Invalid token',
-          }),
+          this.jsonrpcService.createError(
+            {
+              code: E_JSON_RPC_ERROR.INTERNAL_JSON_RPC_ERROR,
+              message: 'Invalid token',
+            },
+            request,
+          ),
         );
       }
 
@@ -467,10 +473,13 @@ export class TcpServerService
     if (!client.isAuthorized) {
       this.sendResponse(
         client,
-        this.jsonrpcService.createError(request, {
-          code: E_JSON_RPC_ERROR.INTERNAL_JSON_RPC_ERROR,
-          message: 'Authorization required. Use TcpServerService.auth(token) method',
-        }),
+        this.jsonrpcService.createError(
+          {
+            code: E_JSON_RPC_ERROR.INTERNAL_JSON_RPC_ERROR,
+            message: 'Authorization required. Use TcpServerService.auth(token) method',
+          },
+          request,
+        ),
       );
       return true;
     }
