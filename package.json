@@ -182,7 +182,7 @@
     "shelljs": "0.8.4",
     "signtool": "1.0.0",
     "sl-vue-tree": "https://github.com/stream-labs/sl-vue-tree.git",
-    "sockjs": "0.3.19",
+    "sockjs": "0.3.20",
     "sockjs-client": "1.1.5",
     "sortablejs": "^1.13.0",
     "spectron": "13.0.0",
