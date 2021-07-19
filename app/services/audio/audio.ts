@@ -46,8 +46,12 @@ interface IAudioSourceData {
 }
 
 class AudioViews extends ViewHandler<IAudioSourcesState> {
+  get activeSceneId() {
+    return this.getServiceViews(ScenesService).activeSceneId;
+  }
+
   get sourcesForCurrentScene(): AudioSource[] {
-    return this.getSourcesForScene(this.getServiceViews(ScenesService).activeSceneId);
+    return this.getSourcesForScene(this.activeSceneId);
   }
 
   getSourcesForScene(sceneId: string): AudioSource[] {
@@ -63,6 +67,18 @@ class AudioViews extends ViewHandler<IAudioSourcesState> {
       .concat(sceneSources)
       .map((sceneSource: ISource) => this.getSource(sceneSource.sourceId))
       .filter(item => item);
+  }
+
+  isSourceVisible(sourceId: string) {
+    const sceneItems = this.getServiceViews(ScenesService).getSceneItemsBySourceId(sourceId);
+    const sceneItemInActiveScene = sceneItems.find(
+      sceneItem => sceneItem.sceneId === this.activeSceneId,
+    );
+
+    if (!sceneItemInActiveScene) return true;
+    if (!sceneItemInActiveScene.video) return true;
+
+    return sceneItemInActiveScene.visible;
   }
 
   getSource(sourceId: string): AudioSource {

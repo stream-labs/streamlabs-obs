@@ -1,5 +1,5 @@
-import { Component, Watch } from 'vue-property-decorator';
-import { AudioService, IVolmeter } from 'services/audio';
+import { Component, Prop, Watch } from 'vue-property-decorator';
+import { AudioService, IVolmeter, IAudioSource } from 'services/audio';
 import { Inject } from 'services/core/injector';
 import { CustomizationService } from 'services/customization';
 import { compileShader, createProgram } from 'util/webgl/utils';
@@ -42,7 +42,9 @@ interface IVolmeterSubscription {
   listener: (e: Electron.Event, volmeter: IVolmeter) => void;
 }
 
-class VolmetersProps {}
+class VolmetersProps {
+  audioSources: IAudioSource[];
+}
 
 /**
  * Renders volmeters for the current scene via WebGL
@@ -73,6 +75,8 @@ export default class GLVolmeters extends TsxComponent<VolmetersProps> {
 
   @Inject() customizationService!: CustomizationService;
   @Inject() audioService: AudioService;
+
+  @Prop() audioSources: IAudioSource[];
 
   subscriptions: Dictionary<IVolmeterSubscription> = {};
 
@@ -125,13 +129,6 @@ export default class GLVolmeters extends TsxComponent<VolmetersProps> {
         }
       },
     );
-  }
-
-  // TODO: refactor into a single source of truth between Mixer and Volmeters
-  get audioSources() {
-    return this.audioService.views.sourcesForCurrentScene.filter(source => {
-      return !source.mixerHidden && source.isControlledViaObs;
-    });
   }
 
   /**

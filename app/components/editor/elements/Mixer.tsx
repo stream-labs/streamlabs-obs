@@ -1,5 +1,5 @@
 import { Component } from 'vue-property-decorator';
-import { AudioService } from 'services/audio';
+import { AudioService, IAudioSource } from 'services/audio';
 import { Inject } from 'services/core/injector';
 import MixerItem from 'components/MixerItem.vue';
 import { $t } from 'services/i18n';
@@ -47,7 +47,11 @@ export default class Mixer extends BaseElement {
 
   get audioSources() {
     return this.audioService.views.sourcesForCurrentScene.filter(source => {
-      return !source.mixerHidden && source.isControlledViaObs;
+      return (
+        !source.mixerHidden &&
+        source.isControlledViaObs &&
+        this.audioService.views.isSourceVisible(source.sourceId)
+      );
     });
   }
 
@@ -72,7 +76,10 @@ export default class Mixer extends BaseElement {
         <Scrollable className="studio-controls-selector mixer-panel">
           <div style={{ position: 'relative' }}>
             {this.audioSources.length !== 0 && !this.performanceMode && (
-              <GLVolmeters style={{ left: '17px', right: '17px', height: '100%' }} />
+              <GLVolmeters
+                style={{ left: '17px', right: '17px', height: '100%' }}
+                audioSources={this.audioSources}
+              />
             )}
             {this.audioSources.map(audioSource => (
               <MixerItem
