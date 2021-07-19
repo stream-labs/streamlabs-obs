@@ -161,7 +161,7 @@ export default class SideNav extends Vue {
           })}
         >
           {this.studioTab(this.studioTabs[0])}
-          {this.studioTabs.length > 1 && this.userService.isPrime && (
+          {this.studioTabs.length > 1 && (
             <i
               class={cx('icon-down', styles.studioDropdown, {
                 [styles.studioDropdownActive]: this.layoutService.state.currentTab !== 'default',
