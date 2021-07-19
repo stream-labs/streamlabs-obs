@@ -31,6 +31,7 @@ export enum WidgetType {
   StarsGoal = 16,
   SupporterGoal = 17,
   CharityGoal = 18,
+  Poll = 19,
 }
 
 export const WidgetTesters: IWidgetTester[] = [
@@ -405,6 +406,20 @@ export const WidgetDefinitions: { [x: number]: IWidget } = {
 
     anchor: AnchorPoint.North,
   },
+  [WidgetType.Poll]: {
+    name: 'Poll',
+    url(host, token) {
+      return `https://${host}/widgets/poll/${token}`;
+    },
+
+    width: 800,
+    height: 400,
+
+    x: 0.5,
+    y: 0.5,
+
+    anchor: AnchorPoint.Center,
+  },
 };
 
 export const WidgetDisplayData = (platform?: string): { [x: number]: IWidgetDisplayData } => ({
@@ -560,6 +575,13 @@ export const WidgetDisplayData = (platform?: string): { [x: number]: IWidgetDisp
     ),
     demoVideo: false,
     demoFilename: 'source-sponsor-banner.png',
+    supportList: [],
+  },
+  [WidgetType.Poll]: {
+    name: $t('Poll'),
+    description: $t('Let your viewers vote on a result'),
+    demoVideo: false,
+    demoFilename: 'poll.png',
     supportList: [],
   },
 });

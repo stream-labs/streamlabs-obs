@@ -1,0 +1,20 @@
+{
+  "Poll": "Poll",
+  "Let your viewers vote on a result": "Let your viewers vote on a result",
+  "Bar Settings": "Bar Settings",
+  "Manage Poll": "Manage Poll",
+  "Poll Type": "Poll Type",
+  "Show Closed Poll": "Show Closed Poll",
+  "Show/hide poll widget on closed poll": "Show/hide poll widget on closed poll",
+  "Primary Background Color": "Primary Background Color",
+  "Secondary Background Color": "Secondary Background Color",
+  "Hide wigdet after X seconds of event": "Hide wigdet after X seconds of event",
+  "Header Text Color": "Header Text Color",
+  "Option Text Color": "Option Text Color",
+  "Title Font Size": "Title Font Size",
+  "Option Font Size": "Option Font Size",
+  "Title Font Weight": "Title Font Weight",
+  "Option Font Weight": "Option Font Weight",
+  "Thin Bar": "Thin Bar",
+  "Display thin/thick Bar": "Display thin/thick Bar"
+}

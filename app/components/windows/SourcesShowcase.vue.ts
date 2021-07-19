@@ -19,6 +19,7 @@ import { CustomizationService } from 'services/customization';
 import { byOS, OS } from 'util/operating-systems';
 import Scrollable from 'components/shared/Scrollable';
 import { getPlatformService } from '../../services/platforms';
+import { $i } from 'services/utils';
 
 type TInspectableSource = TSourceType | WidgetType | 'streamlabel' | 'app_source' | string;
 
@@ -83,7 +84,7 @@ export default class SourcesShowcase extends Vue {
   getSrc(type: string) {
     const theme = this.demoMode;
     const dataSource = this.widgetData(type) ? this.widgetData : this.sourceData;
-    return require(`../../../media/source-demos/${theme}/${dataSource(type).demoFilename}`);
+    return $i(`source-demos/${theme}/${dataSource(type).demoFilename}`);
   }
 
   getLoginSrc() {

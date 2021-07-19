@@ -256,3 +256,17 @@ export default class Utils {
 export function keys<T>(target: T) {
   return Object.keys(target) as (keyof T)[];
 }
+
+/**
+ * A fallback-safe method of fetching images
+ * from either our local storage or the CDN
+ * @param path The path structure to retrieve the image from the media folders
+ */
+export function $i(path: string) {
+  try {
+    const localMediaPath = require(`../../media/${path}`);
+    return localMediaPath;
+  } catch (e: unknown) {
+    return `https://slobs-cdn.streamlabs.com/media/${path}`;
+  }
+}

@@ -68,6 +68,7 @@ import SponsorBanner from 'components/widgets/SponsorBanner.vue';
 import MediaShare from 'components/widgets/MediaShare';
 import AlertBox from 'components/widgets/AlertBox.vue';
 import SpinWheel from 'components/widgets/SpinWheel.vue';
+import Poll from 'components/widgets/Poll';
 
 import { byOS, OS } from 'util/operating-systems';
 import { UsageStatisticsService } from './usage-statistics';
@@ -131,6 +132,7 @@ export function getComponents() {
     MediaShare,
     AlertBox,
     SpinWheel,
+    Poll,
     WelcomeToPrime,
     GoLiveWindow,
     EditStreamWindow,

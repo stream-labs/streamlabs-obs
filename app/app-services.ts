@@ -107,6 +107,7 @@ export { SubGoalService } from 'services/widgets/settings/sub-goal';
 export { MediaShareService } from 'services/widgets/settings/media-share';
 export { AlertBoxService } from 'services/widgets/settings/alert-box';
 export { SpinWheelService } from 'services/widgets/settings/spin-wheel';
+export { PollService } from 'services/widgets/settings/poll';
 
 import { WindowsService } from './services/windows';
 import { CustomizationService } from './services/customization';
