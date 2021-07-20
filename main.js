@@ -770,3 +770,18 @@ function measure(msg, time) {
   if (delta > 2000) console.log('------------------');
   console.log(msg, delta + 'ms');
 }
+
+app.on('session-created', session => {
+  const directory = path.join(app.getAppPath(), 'extensions');
+  if (!fs.existsSync(directory)) return;
+  fs.readdir(directory, { withFileTypes: true }, (err, dirs) => {
+    if (err) return;
+    const extDirs = dirs.filter(f => f.isDirectory()).map(d => path.join(directory, d.name));
+    extDirs.map(dir =>
+      session
+        .loadExtension(dir)
+        .then(extension => console.log('Extension loaded: ', extension.name, extension.version))
+        .catch(error => console.log('Extension failed to load: ', dir, error)),
+    );
+  });
+});
